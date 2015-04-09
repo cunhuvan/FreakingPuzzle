@@ -1,12 +1,19 @@
+#define COCOS2D_DEBUG 1
 #include "HelloWorldScene.h"
+#include "Setting.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
+	CCMenuItemSprite *newgame,*SelectArea,*continuegame,*rate,*facebook,*setting;
 
+	float VisibleSize_high,VisibleSize_width,origin_x,origin_y;
 Scene* HelloWorld::createScene()
 {
+	auto spritecache = SpriteFrameCache::getInstance();
+	spritecache->addSpriteFramesWithFile("MainMenu.plist");
     // 'scene' is an autorelease object
     auto scene = Scene::create();
-    
+
     // 'layer' is an autorelease object
     auto layer = HelloWorld::create();
 
@@ -22,70 +29,147 @@ bool HelloWorld::init()
 {
     //////////////////////////////
     // 1. super init first
+	layer_dim->setTag(2);
+	layer_dialog->setTag(3);
+	Vector<MenuItem*> MenuItem;
     if ( !Layer::init() )
     {
         return false;
     }
-    
+
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
+    VisibleSize_high = visibleSize.height;
+    VisibleSize_width = visibleSize.width;
+    origin_x = origin.x;
+    origin_y = origin.y;
 
     // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+	newgame = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("new game.png"),
+										CCSprite::createWithSpriteFrameName("new game_press.png"),
+										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+	SelectArea = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("select area icon.png"),
+										CCSprite::createWithSpriteFrameName("select area icon_press.png"),
+										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
     
-	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
-                                origin.y + closeItem->getContentSize().height/2));
+	continuegame = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("continue.png"),
+										CCSprite::createWithSpriteFrameName("continue_press.png"),
+										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
 
+	rate = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("rate icon.png"),
+									CCSprite::createWithSpriteFrameName("rate icon_press.png"),
+									CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+
+	facebook = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("facebook icon.png"),
+										CCSprite::createWithSpriteFrameName("facebook icon_press.png"),
+										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+
+	setting = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("setting icon.png"),
+										CCSprite::createWithSpriteFrameName("setting icon_press.png"),
+										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+
+	SelectArea->setPosition(Vec2(visibleSize.width / 2 + origin.x + 80, visibleSize.height / 2 + origin.y - 300));
+	rate->setPosition(Vec2(visibleSize.width / 2 + origin.x , visibleSize.height / 2 + origin.y - 300));
+	facebook->setPosition(Vec2(visibleSize.width / 2 + origin.x - 80, visibleSize.height / 2 + origin.y - 300));
+	setting->setPosition(Vec2(visibleSize.width / 2 + origin.x - 160, visibleSize.height / 2 + origin.y - 300));
+	newgame->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	continuegame->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y - 150));
+
+	MenuItem.pushBack(facebook);
+	MenuItem.pushBack(newgame);
+	MenuItem.pushBack(setting);
+	MenuItem.pushBack(continuegame);
+	MenuItem.pushBack(rate);
+	MenuItem.pushBack(SelectArea);
     // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
+	auto menu = Menu::createWithArray(MenuItem);
     menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+    HelloWorld::layer_bg->addChild(menu, 1);
 
-    /////////////////////////////
-    // 3. add your codes below...
 
-    // add a label shows "Hello World"
-    // create and initialize a label
-    
-    auto label = LabelTTF::create("Hello World", "Arial", 24);
-    
-    // position the label on the center of the screen
-    label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                            origin.y + visibleSize.height - label->getContentSize().height));
-
-    // add the label as a child to this layer
-    this->addChild(label, 1);
-
-    // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
+    // add "main_menu" splash screen"
+	auto mysprite = Sprite::createWithSpriteFrameName("mainmenu.png");
 
     // position the sprite on the center of the screen
-    sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+	mysprite->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+	mysprite->setScaleY(visibleSize.height / mysprite->getContentSize().height);
 
     // add the sprite as a child to this layer
-    this->addChild(sprite, 0);
-    
+	HelloWorld::layer_bg->addChild(mysprite, 0);
+	this->addChild(HelloWorld::layer_bg);
+	this->setKeypadEnabled(true);
+
+	//set background music
+	auto audio = CocosDenshion::SimpleAudioEngine::getInstance();
+	audio->playBackgroundMusic("GameSound.mp3");
+
     return true;
 }
 
-
-void HelloWorld::menuCloseCallback(Ref* pSender)
+void HelloWorld::onKeyReleased(EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-	MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
-    return;
-#endif
 
-    Director::getInstance()->end();
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
-#endif
+	if (keyCode == EventKeyboard::KeyCode::KEY_BACK /*KeyboardEvent::KeyCode::Menu(KEY_BACKSPACE)*/)
+	{
+
+			layer_dim = LayerColor::create(Color4B(0, 0, 0, 160));
+			layer_dim->setContentSize(Size(100, 100));
+			layer_dim->setAnchorPoint(Vec2(0,0));
+			layer_dim->setPosition(Vec2(0,0));
+			layer_dim->setScaleY(VisibleSize_high / 100);
+			layer_dim->setScaleX(VisibleSize_width / 100);
+
+			this->addChild(layer_dim,3);
+			newgame->setEnabled(false);
+			continuegame->setEnabled(false);
+			facebook->setEnabled(false);
+			rate->setEnabled(false);
+			SelectArea->setEnabled(false);
+			CreateCanclePopup();
+	}
+}
+
+void HelloWorld::CreateCanclePopup() //?????????
+{
+	layer_dialog = Layer::create();
+	Vector<MenuItem*> menuItem;
+	auto dlog = Sprite::createWithSpriteFrameName("ExitPopup.png");
+	dlog->setPosition(Vec2(VisibleSize_width / 2 + origin_x, VisibleSize_high / 2 + origin_y));
+	MenuItemSprite *Cancle = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("cancel.png"),
+													CCSprite::createWithSpriteFrameName("cancel_press.png"),
+													CC_CALLBACK_1(HelloWorld::Cancel_event, this));
+
+	MenuItemSprite *Ok = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("ok.png"),
+										CCSprite::createWithSpriteFrameName("ok_press.png"),
+										CC_CALLBACK_1(HelloWorld::Ok_event, this));
+
+	Cancle->setPosition(Vec2(VisibleSize_width / 2 + origin_x - 335, VisibleSize_high / 2 + origin_y - 445));
+	Cancle->setEnabled(true);
+	Ok->setPosition(Vec2(VisibleSize_width / 2 + origin_x - 143, VisibleSize_high / 2 + origin_y - 445));
+
+	menuItem.pushBack(Cancle);
+	menuItem.pushBack(Ok);
+	auto menu = Menu::createWithArray(menuItem);
+	layer_dialog->addChild(dlog);
+	layer_dialog->addChild(menu,2);
+	this->addChild(layer_dialog,4);
+}
+
+void HelloWorld::Cancel_event(cocos2d::Ref* pSender)
+{
+	removeChild(layer_dim);
+	removeChild(layer_dialog);
+
+}
+
+void HelloWorld::Ok_event(cocos2d::Ref* pSender)
+{
+	Director::sharedDirector()->end();
+}
+
+void HelloWorld::menuCloseCallback(cocos2d::Ref* pSender)
+{
+	Scene *newscene = Setting::createScene();
+	Director::getInstance()->pushScene(newscene);
 }
