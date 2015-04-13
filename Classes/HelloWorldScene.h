@@ -17,7 +17,8 @@ public:
     virtual bool init();
     
     // a selector callback
-	void menuCloseCallback(cocos2d::Ref* pSender);
+	void Setting(cocos2d::Ref* pSender);
+	void NewGame(cocos2d::Ref* pSender);
 	void Cancel_event(cocos2d::Ref* pSender);
 	void Ok_event(cocos2d::Ref* pSender);
 

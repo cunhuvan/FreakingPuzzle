@@ -2,6 +2,7 @@
 #include "HelloWorldScene.h"
 #include "Setting.h"
 #include "SimpleAudioEngine.h"
+#include "SelectMap.h"
 
 USING_NS_CC;
 	CCMenuItemSprite *newgame,*SelectArea,*continuegame,*rate,*facebook,*setting;
@@ -47,26 +48,26 @@ bool HelloWorld::init()
     // add a "close" icon to exit the progress. it's an autorelease object
 	newgame = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("new game.png"),
 										CCSprite::createWithSpriteFrameName("new game_press.png"),
-										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+										CC_CALLBACK_1(HelloWorld::NewGame, this));
 	SelectArea = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("select area icon.png"),
 										CCSprite::createWithSpriteFrameName("select area icon_press.png"),
-										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+										CC_CALLBACK_1(HelloWorld::Setting, this));
     
 	continuegame = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("continue.png"),
 										CCSprite::createWithSpriteFrameName("continue_press.png"),
-										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+										CC_CALLBACK_1(HelloWorld::Setting, this));
 
 	rate = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("rate icon.png"),
 									CCSprite::createWithSpriteFrameName("rate icon_press.png"),
-									CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+									CC_CALLBACK_1(HelloWorld::Setting, this));
 
 	facebook = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("facebook icon.png"),
 										CCSprite::createWithSpriteFrameName("facebook icon_press.png"),
-										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+										CC_CALLBACK_1(HelloWorld::Setting, this));
 
 	setting = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("setting icon.png"),
 										CCSprite::createWithSpriteFrameName("setting icon_press.png"),
-										CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
+										CC_CALLBACK_1(HelloWorld::Setting, this));
 
 	SelectArea->setPosition(Vec2(visibleSize.width / 2 + origin.x + 80, visibleSize.height / 2 + origin.y - 300));
 	rate->setPosition(Vec2(visibleSize.width / 2 + origin.x , visibleSize.height / 2 + origin.y - 300));
@@ -134,6 +135,7 @@ void HelloWorld::CreateCanclePopup() //?????????
 {
 	layer_dialog = Layer::create();
 	Vector<MenuItem*> menuItem;
+	//create a new sprite for dialog exit
 	auto dlog = Sprite::createWithSpriteFrameName("ExitPopup.png");
 	dlog->setPosition(Vec2(VisibleSize_width / 2 + origin_x, VisibleSize_high / 2 + origin_y));
 	MenuItemSprite *Cancle = CCMenuItemSprite::create(CCSprite::createWithSpriteFrameName("cancel.png"),
@@ -156,20 +158,31 @@ void HelloWorld::CreateCanclePopup() //?????????
 	this->addChild(layer_dialog,4);
 }
 
+//event for cancel button
 void HelloWorld::Cancel_event(cocos2d::Ref* pSender)
 {
 	removeChild(layer_dim);
 	removeChild(layer_dialog);
-
+	newgame->setEnabled(true);
+	continuegame->setEnabled(true);
+	facebook->setEnabled(true);
+	rate->setEnabled(true);
+	SelectArea->setEnabled(true);
 }
 
+//event for ok buttin
 void HelloWorld::Ok_event(cocos2d::Ref* pSender)
 {
 	Director::sharedDirector()->end();
 }
 
-void HelloWorld::menuCloseCallback(cocos2d::Ref* pSender)
+void HelloWorld::Setting(cocos2d::Ref* pSender)
 {
-	Scene *newscene = Setting::createScene();
-	Director::getInstance()->pushScene(newscene);
+	Scene *setting = Setting::createScene();
+	Director::getInstance()->pushScene(setting);
+}
+
+void HelloWorld::NewGame(cocos2d::Ref* pSender){
+	Scene *newGameScene = SelectMap::createScene();
+	Director::getInstance()->pushScene(newGameScene);
 }
